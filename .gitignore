@@ -1,0 +1,25 @@
+# Byte-compiled / cache
+__pycache__/
+*.py[cod]
+
+# Virtual environment
+.venv/
+
+# Jupyter/IPython
+.ipynb_checkpoints/
+
+# IDE files
+.idea/
+.vscode/
+
+# MLflow and logs
+mlruns/
+logs/
+
+# Data & model artifacts
+*.pkl
+*.csv
+
+# Optional OS files
+.DS_Store
+Thumbs.db
