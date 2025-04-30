@@ -75,14 +75,3 @@ gcloud run deploy ctr-streamlit-ui \
   --region us-central1 \
   --allow-unauthenticated
 ```
-
----
-
-## 📷 Screenshots
-![UI](screenshots/app_ui.png)
-
----
-
-## 📬 Contact
-For questions, contact `aimldstejas@gmail.com` or raise an issue.
-
