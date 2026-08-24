@@ -1,7 +1,11 @@
+# scikit-learn and xgboost are pinned to match the versions that trained
+# and pickled the model/preprocessor (see training/model_training.py) --
+# an unpinned scikit-learn install here previously resolved to an older
+# version (Python 3.9's image couldn't install 1.9.0, which requires
+# Python >=3.11), which silently produced wrong predictions since sklearn
+# only guarantees pickle compatibility within the same version.
 streamlit
-xgboost
-scikit-learn
+xgboost==3.2.0
+scikit-learn==1.9.0
 pandas
 joblib
-shap
-matplotlib

@@ -3,8 +3,6 @@ import streamlit as st
 import pandas as pd
 import joblib
 import xgboost as xgb
-import numpy as np
-import os
 from sklearn.utils.validation import check_is_fitted
 
 # Load model and preprocessor
@@ -68,5 +66,3 @@ if submit:
             st.success(f"**Predicted CTR:** {ctr_pred:.2%}")
         except Exception as e:
             st.error(f"Prediction failed: {e}")
-if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 8080))

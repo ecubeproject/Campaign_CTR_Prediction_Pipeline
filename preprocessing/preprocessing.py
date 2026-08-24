@@ -10,10 +10,24 @@ from sklearn.impute import SimpleImputer
 # Set project root path
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 
-# Load dataset
-data_path = os.path.join(PROJECT_ROOT, "data", "campaign_data.csv")
-df = pd.read_csv(data_path)
-print(f"\nLoaded data from: {data_path}")
+# BigQuery is the source of truth for training data. Set
+# BQ_PROJECT_ID (and optionally BQ_TABLE) to read from there; otherwise
+# fall back to the local CSV snapshot in data/campaign_data.csv, which is
+# only meant as an offline copy / GitHub Actions fallback when no GCP
+# credentials are available.
+bq_project = os.environ.get("BQ_PROJECT_ID")
+bq_table = os.environ.get("BQ_TABLE", "ctr_prediction.campaign_data")
+
+if bq_project:
+    from google.cloud import bigquery
+    client = bigquery.Client(project=bq_project)
+    df = client.query(f"SELECT * FROM `{bq_project}.{bq_table}`").to_dataframe()
+    print(f"\nLoaded {len(df)} rows from BigQuery: {bq_project}.{bq_table}")
+else:
+    data_path = os.path.join(PROJECT_ROOT, "data", "campaign_data.csv")
+    df = pd.read_csv(data_path)
+    print(f"\nBQ_PROJECT_ID not set -- loaded local fallback data from: {data_path}")
+
 print(f"Original columns: {df.columns.tolist()}")
 
 # Drop ID and Target column

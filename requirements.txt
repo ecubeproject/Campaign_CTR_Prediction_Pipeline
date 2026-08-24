@@ -1,0 +1,14 @@
+# Full pipeline dependencies: data generation, preprocessing, training, and
+# BigQuery access. The deployed Streamlit app has its own smaller
+# requirements file (Streamlit_CTR_app/requirements.txt) since it doesn't
+# need mlflow/shap/BigQuery at inference time.
+pandas
+numpy
+scikit-learn
+xgboost
+mlflow
+shap
+matplotlib
+joblib
+google-cloud-bigquery
+db-dtypes
