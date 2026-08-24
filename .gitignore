@@ -14,11 +14,8 @@ __pycache__/
 
 # MLflow and logs
 mlruns/
+mlflow.db
 logs/
-
-# Data & model artifacts
-*.pkl
-*.csv
 
 # Optional OS files
 .DS_Store

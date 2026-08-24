@@ -21,7 +21,7 @@ drop_cols = ['campaign_id', 'click_through_rate']
 X = df.drop(columns=drop_cols)
 y = df['click_through_rate']
 
-print(f"\n🎯 Columns dropped: {drop_cols}")
+print(f"\nColumns dropped: {drop_cols}")
 print(f"Features used for preprocessing: {X.columns.tolist()}")
 print(f"Target variable: {y.name}")
 
