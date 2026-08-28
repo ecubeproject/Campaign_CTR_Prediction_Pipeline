@@ -1,3 +1,4 @@
+import os
 
 import streamlit as st
 import pandas as pd
@@ -5,16 +6,39 @@ import joblib
 import xgboost as xgb
 from sklearn.utils.validation import check_is_fitted
 
-# Load model and preprocessor
-model = xgb.XGBRegressor()
-model.load_model("xgb_meta_model.json")
-preprocessor = joblib.load("preprocessor.pkl")
-check_is_fitted(preprocessor)
+# Resolve artifact paths relative to this file, not the process CWD.
+# Streamlit Community Cloud runs `streamlit run` from the repo root, so bare
+# relative paths like "xgb_meta_model.json" would not be found; the Docker
+# image happened to work only because its WORKDIR is this folder.
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+
+@st.cache_resource
+def load_artifacts():
+    mdl = xgb.XGBRegressor()
+    mdl.load_model(os.path.join(BASE_DIR, "xgb_meta_model.json"))
+    pre = joblib.load(os.path.join(BASE_DIR, "preprocessor.pkl"))
+    check_is_fitted(pre)
+    return mdl, pre
+
+
+model, preprocessor = load_artifacts()
 
 # Streamlit App
-st.set_page_config(page_title="CTR Predictor", layout="centered")
-st.title("Campaign CTR Predictor (XGBoost + Streamlit)")
-st.markdown("Enter campaign details below to predict **Click-Through Rate (CTR)**.")
+st.set_page_config(page_title="Campaign CTR Predictor", page_icon="📈", layout="centered")
+st.title("📈 Campaign CTR Predictor")
+st.markdown(
+    "Estimate a marketing campaign's **click-through rate (CTR)** from "
+    "pre-campaign planning attributes only — product, audience, channel, "
+    "budget and duration. Built with an XGBoost model and a scikit-learn "
+    "preprocessing pipeline."
+)
+st.caption(
+    "Skills demo. The model was trained on a synthetic 10,000-row dataset with "
+    "realistic relationships deliberately encoded (search channels convert "
+    "better, product/age affinity, diminishing budget returns, ad fatigue). "
+    "Held-out test R² ≈ 0.86, RMSE ≈ 0.006."
+)
 
 # Input fields
 with st.form("campaign_form"):
@@ -34,11 +58,10 @@ with st.form("campaign_form"):
     submit = st.form_submit_button("Predict CTR")
 
 if submit:
-    # Build input as dictionary. Only pre-campaign planning attributes are
-    # used -- clicks/impressions/conversions are outcomes of a campaign,
-    # not knowable in advance, so they are never model inputs (using them
-    # here would let the model "predict" CTR by just recovering
-    # clicks / impressions, which is circular and not real prediction).
+    # Only pre-campaign planning attributes are used -- clicks / impressions /
+    # conversions are outcomes of a campaign, not knowable in advance, so they
+    # are never model inputs (using them here would let the model "predict"
+    # CTR by just recovering clicks / impressions, which is circular).
     input_dict = {
         "product_type": product_type,
         "audience_age": audience_age,
@@ -51,18 +74,15 @@ if submit:
 
     input_data = pd.DataFrame([input_dict])
 
-    # Validate input columns
     expected_cols = set(preprocessor.feature_names_in_)
-    print(expected_cols)
-    received_cols = set(input_data.columns)
-    missing_cols = expected_cols - received_cols
+    missing_cols = expected_cols - set(input_data.columns)
 
     if missing_cols:
         st.error(f"Input data is missing required columns for preprocessing: {missing_cols}")
     else:
         try:
             X_processed = preprocessor.transform(input_data)
-            ctr_pred = model.predict(X_processed)[0]
-            st.success(f"**Predicted CTR:** {ctr_pred:.2%}")
+            ctr_pred = float(model.predict(X_processed)[0])
+            st.metric("Predicted CTR", f"{ctr_pred:.2%}")
         except Exception as e:
             st.error(f"Prediction failed: {e}")
