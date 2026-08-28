@@ -31,13 +31,7 @@ st.markdown(
     "Estimate a marketing campaign's **click-through rate (CTR)** from "
     "pre-campaign planning attributes only — product, audience, channel, "
     "budget and duration. Built with an XGBoost model and a scikit-learn "
-    "preprocessing pipeline."
-)
-st.caption(
-    "Skills demo. The model was trained on a synthetic 10,000-row dataset with "
-    "realistic relationships deliberately encoded (search channels convert "
-    "better, product/age affinity, diminishing budget returns, ad fatigue). "
-    "Held-out test R² ≈ 0.86, RMSE ≈ 0.006."
+    "preprocessing pipeline. See the linked repo for methodology and data notes."
 )
 
 # Input fields
