@@ -80,3 +80,5 @@ if submit:
             st.metric("Predicted CTR", f"{ctr_pred:.2%}")
         except Exception as e:
             st.error(f"Prediction failed: {e}")
+
+st.caption("Auto-deployed from GitHub via Cloud Run CI/CD.")  # cicd-test-1787950226
