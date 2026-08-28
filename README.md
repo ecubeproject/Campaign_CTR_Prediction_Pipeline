@@ -1,11 +1,11 @@
 # Campaign CTR Prediction Pipeline
 
-An end-to-end ML pipeline that predicts marketing campaign **Click-Through Rate (CTR)** from pre-campaign planning attributes (product, audience, budget, channel, duration, location), using XGBoost, tracked with MLflow, and deployed as a Streamlit app on **Google Cloud Run**, reading training data from **BigQuery**.
+An end-to-end ML pipeline that predicts marketing campaign **Click-Through Rate (CTR)** from pre-campaign planning attributes (product, audience, budget, channel, duration, location), using XGBoost, tracked with MLflow, reading training data from **BigQuery**, and served as a Streamlit app (live demo on Streamlit Community Cloud; a Dockerfile is included for Cloud Run / any container host).
 
 **This is primarily an MLOps / cloud-deployment skills demo, not a claim of a production-grade CTR model.** The training data is synthetic — see "About the Data" below for exactly what that means and why.
 
-**Live demo:** https://ctr-streamlit-ui-177064880623.us-central1.run.app
-(Runs on Cloud Run's scale-to-zero tier — the first request after a period of inactivity may take 5-15 seconds to cold-start.)
+**Live demo:** https://campaign-ctr-prediction.streamlit.app/
+(Runs on Streamlit Community Cloud's free tier — it sleeps after inactivity, so the first request may take ~30s to wake. `Streamlit_CTR_app/Dockerfile` deploys the same app to Cloud Run or any container host.)
 
 ---
 
