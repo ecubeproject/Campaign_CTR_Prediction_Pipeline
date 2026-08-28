@@ -1,0 +1,45 @@
+name: Deploy CTR app to Cloud Run
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "Streamlit_CTR_app/**"
+      - ".github/workflows/deploy-cloudrun.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    # Skips cleanly until the GCP auth variables are configured (see CICD_SETUP.md)
+    if: ${{ vars.GCP_WIF_PROVIDER != '' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          project_id: ${{ vars.GCP_PROJECT }}
+          workload_identity_provider: ${{ vars.GCP_WIF_PROVIDER }}
+          service_account: ${{ vars.GCP_SERVICE_ACCOUNT }}
+
+      - uses: google-github-actions/setup-gcloud@v2
+
+      - name: Deploy to Cloud Run
+        run: |
+          gcloud run deploy ctr-streamlit-ui \
+            --source Streamlit_CTR_app \
+            --project "${{ vars.GCP_PROJECT }}" \
+            --region us-central1 \
+            --allow-unauthenticated \
+            --quiet
+
+      - name: Show service URL
+        run: |
+          gcloud run services describe ctr-streamlit-ui \
+            --project "${{ vars.GCP_PROJECT }}" --region us-central1 \
+            --format 'value(status.url)'
