@@ -14,6 +14,7 @@ An end-to-end ML pipeline that predicts marketing campaign **Click-Through Rate 
 - A modular ML pipeline: data generation → BigQuery → preprocessing → training (MLflow-tracked) → SHAP explainability → Streamlit UI → Docker → Cloud Run.
 - Reading training data from a live BigQuery table rather than a static file.
 - Deploying a containerized app to Cloud Run via Cloud Build + Artifact Registry.
+- **Keyless CI/CD:** a GitHub Actions workflow that authenticates to GCP with Workload Identity Federation (no long-lived service-account key) and auto-deploys a new Cloud Run revision on every push to `main`.
 - A real bug caught and fixed during deployment: an unpinned `scikit-learn` version in the Docker image silently produced wrong predictions because the container's Python version couldn't install the same sklearn version used to pickle the preprocessor (see "Lessons Learned" below) — worth reading if you're deploying scikit-learn pickles in containers.
 
 ## About the Data
@@ -126,6 +127,22 @@ gcloud run deploy ctr-streamlit-ui \
   --region us-central1 \
   --allow-unauthenticated
 ```
+
+## CI/CD (GitHub Actions -> Cloud Run)
+
+`.github/workflows/deploy-cloudrun.yml` redeploys the app on every push to `main`
+that touches `Streamlit_CTR_app/**`:
+
+- **Authentication is keyless** via Workload Identity Federation — the workflow
+  exchanges its OIDC token for short-lived GCP credentials; there is no
+  service-account JSON key stored anywhere.
+- The provider is scoped to this repository only
+  (`attribute.repository == 'ecubeproject/Campaign_CTR_Prediction_Pipeline'`).
+- The deploy job runs `gcloud run deploy ctr-streamlit-ui --source Streamlit_CTR_app`,
+  which builds via Cloud Build and rolls out a new Cloud Run revision.
+
+One-time setup (service account + WIF pool + three repo variables) is scripted in
+[`CICD_SETUP.md`](CICD_SETUP.md). The workflow skips cleanly until those variables exist.
 
 This repo's live deployment runs on Cloud Run's scale-to-zero tier with a monthly billing budget alert configured — realistic cost for light/demo traffic is close to $0/month (Cloud Run, BigQuery, and Artifact Registry all have generous always-free tiers that comfortably cover a 10K-row dataset and occasional requests).
 
